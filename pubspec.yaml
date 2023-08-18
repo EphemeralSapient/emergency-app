@@ -1,0 +1,28 @@
+name: example
+description: Demonstrates how to use the location plugin.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.0 <4.0.0'
+  flutter: '>=3.3.0'
+
+dependencies:
+  android_physical_buttons: ^0.1.0
+  flutter:
+    sdk: flutter
+  flutter_background: ^1.2.0
+  http: ^1.1.0
+  intl: ^0.18.1
+  location:
+    path: ../
+  permission_handler: ^10.4.3
+  url_launcher: ^6.0.2
+
+dev_dependencies:
+  leancode_lint: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/drone.png
