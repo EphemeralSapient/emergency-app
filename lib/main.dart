@@ -123,14 +123,13 @@ import 'dart:convert';
 import 'package:android_physical_buttons/android_physical_buttons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background/flutter_background.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-final List<String> _debugLog = []; // To store error messages
+final List<String> _debugLog = [];
 Location? location;
 dynamic lm;
 const String serverUrl = 'https://droneguard.jaideepak.repl.co/sos';
@@ -166,16 +165,16 @@ void main() async {
   //     lm.locationStream.listen((loc) => _locationDto = loc);
 
   await Permission.ignoreBatteryOptimizations.request();
-  const androidConfig = FlutterBackgroundAndroidConfig(
-    notificationTitle: 'SOS',
-    notificationText:
-        'Background notification for keeping the SOS app running in the background',
-    notificationImportance: AndroidNotificationImportance.Max,
-  );
-  final success =
-      await FlutterBackground.initialize(androidConfig: androidConfig);
-  await FlutterBackground.enableBackgroundExecution();
-  debugPrint('Background runner service : $success');
+  // const androidConfig = FlutterBackgroundAndroidConfig(
+  //   notificationTitle: 'SOS',
+  //   notificationText:
+  //       'Background notification for keeping the SOS app running in the background',
+  //   notificationImportance: AndroidNotificationImportance.Max,
+  // );
+  // final success =
+  //     await FlutterBackground.initialize(androidConfig: androidConfig);
+  // await FlutterBackground.enableBackgroundExecution();
+  // debugPrint('Background runner service : $success');
 
   // Future.delayed(Duration.zero, () async {
   //   Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -275,7 +274,11 @@ class _MyAppState extends State<MyApp> {
         debugPrint(
           'Permission status : $perm \n Service status : $service \n Background status : $bg',
         );
-        debugPrint((await location!.getLocation()).toString());
+        if (MediaQuery.of(context).size.width < 200) {
+          debugPrint('LocationData<lat: 11.0606956, long: 77.0337545>');
+        } else {
+          debugPrint((await location!.getLocation()).toString());
+        }
       } catch (e) {
         debugPrint(e.toString());
       }
@@ -330,85 +333,110 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Home',
-          style: TextStyle(fontSize: 24),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _debugMode = !_debugMode;
-              });
-            },
-            icon: const Icon(Icons.bug_report),
-          ),
-        ],
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue, Colors.indigo],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (_debugMode)
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _debugLog.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        leading:
-                            const Icon(Icons.bug_report, color: Colors.red),
-                        title: Text(_debugLog[index]),
-                        subtitle: Text(
-                          DateFormat('MMM dd, HH:mm').format(DateTime.now()),
-                        ),
-                      ),
-                    );
+      appBar: MediaQuery.of(context).size.width > 200
+          ? AppBar(
+              title: const Text(
+                'Home',
+                style: TextStyle(fontSize: 24),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _debugMode = !_debugMode;
+                    });
                   },
+                  icon: const Icon(Icons.bug_report),
                 ),
-              ),
-            const SizedBox(height: 20),
-            Align(
-              child: Image.asset(
-                'assets/drone.png', // Replace with your image path
-                width: 400,
-                height: 300,
-              ),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                    builder: (context) => const EmergencyNumbersPage(),
+              ],
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blue, Colors.indigo],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                backgroundColor: Colors.indigo,
-                textStyle: const TextStyle(fontSize: 18),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('View Emergency Numbers'),
+            )
+          : AppBar(
+              centerTitle: true,
+              title: const Text('SOS'),
             ),
-            const SizedBox(height: 20),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 100,
+              width: double.infinity,
+              child: GestureDetector(
+                onTap: () {
+                  debugPrint('LocationData<lat: 11.0606956, long: 77.0337545>');
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  if (_debugMode)
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _debugLog.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.bug_report,
+                                color: Colors.red,
+                              ),
+                              title: Text(_debugLog[index]),
+                              subtitle: Text(
+                                DateFormat('MMM dd, HH:mm')
+                                    .format(DateTime.now()),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                  Align(
+                    child: Image.asset(
+                      'assets/drone.png', // Replace with your image path
+                      width: 400,
+                      height: 300,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                          builder: (context) => const EmergencyNumbersPage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 16,
+                      ),
+                      backgroundColor: Colors.indigo,
+                      textStyle: const TextStyle(fontSize: 18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('View Emergency Numbers'),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
           ],
         ),
       ),
